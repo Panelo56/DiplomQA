@@ -52,14 +52,45 @@ public class InterfacePayCreditTest {
         tripForm.valuesfortheform(cardData.getNumber(), cardData.getMonth(), cardData.getYear(), cardData.getHolder(), cardData.getCvc());
         tripForm.matchingvalues(cardData.getNumber(), cardData.getMonth(), cardData.getYear(), cardData.getHolder(), cardData.getCvc());
         tripForm.confirmationofsuccessfuloperation();
-        payments = DataBaseHelper.getPayments();
-        credits = DataBaseHelper.getCreditsRequest();
-        orders = DataBaseHelper.getOrders();
+        payments = DataBaseHelper.getPay();
+        credits = DataBaseHelper.getCredit();
+        orders = DataBaseHelper.getOrder();
         assertEquals(0, payments.size());
         assertEquals(1, credits.size());
         assertEquals(1, orders.size());
         assertTrue(credits.get(0).getStatus().equalsIgnoreCase("approved"));
         assertEquals(credits.get(0).getBank_id(), orders.get(0).getPayment_id());
         assertEquals(credits.get(0).getId(), orders.get(0).getCredit_id());
+    }
+
+    @Test
+    public void shouldUnsuccessfulSending() {
+        cardData = DataHelper.getValidDeclinedCard();
+
+        tripForm = tripCard.CreditButton();
+        tripForm.valuesfortheform(cardData.getNumber(), cardData.getMonth(), cardData.getYear(), cardData.getHolder(), cardData.getCvc());
+        tripForm.matchingvalues(cardData.getNumber(), cardData.getMonth(), cardData.getYear(), cardData.getHolder(), cardData.getCvc());
+        tripForm.purchaseconfirmationwitherrormessage();
+
+        payments = DataBaseHelper.getPay();
+        credits = DataBaseHelper.getCredit();
+        orders = DataBaseHelper.getOrder();
+        assertEquals(0, payments.size());
+        assertEquals(1, credits.size());
+        assertEquals(1, orders.size());
+
+        assertTrue(credits.get(0).getStatus().equalsIgnoreCase("declined"));
+        assertEquals(credits.get(0).getBank_id(), orders.get(0).getPayment_id());
+        assertEquals(credits.get(0).getId(), orders.get(0).getCredit_id());
+    }
+
+    @Test
+    public void shouldImmutableInputValuesAfterClickButton() {
+        cardData = DataHelper.getValidApprovedCard();
+
+        tripForm = tripCard.PayButton();
+        tripForm.valuesfortheform(cardData.getNumber(), cardData.getMonth(), cardData.getYear(), cardData.getHolder(), cardData.getCvc());
+        tripCard.CreditButton();
+        tripForm.matchingvalues(cardData.getNumber(), cardData.getMonth(), cardData.getYear(), cardData.getHolder(), cardData.getCvc());
     }
 }

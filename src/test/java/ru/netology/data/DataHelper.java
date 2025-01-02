@@ -9,6 +9,7 @@ import com.github.javafaker.Faker;
 
 public class DataHelper {
     private static final Faker faker = new Faker(Locale.ENGLISH);
+    private static final Faker fakerWithCyrillicLocale = new Faker(new Locale("ru", "RU"));
 
     @Value
     public static class CardData {
@@ -47,5 +48,44 @@ public class DataHelper {
 
     public static String genValidCVC() {
         return faker.numerify("###");
+    }
+
+    public static CardData getValidDeclinedCard() {
+        return new CardData(getStatusNumber("declined"), genMonth(1), genYear(2),
+                genValidHolder(), genValidCVC());
+    }
+
+    public static String genRandomInvalidCardNumber() {
+        return faker.letterify("???? ???? ???? ????");
+    }
+
+    public static String genRandomMonth() {
+        return faker.letterify("??");
+    }
+
+    public static String genValidHolderLastNameDouble() {
+        return faker.name().lastName().toUpperCase() + "-" + faker.name().lastName().toUpperCase() + " "
+                + faker.name().firstName().toUpperCase();
+    }
+
+    public static String genInvalidCyrillicHolder() {
+        return fakerWithCyrillicLocale.name().firstName().toUpperCase() + " "
+                + fakerWithCyrillicLocale.name().lastName().toUpperCase();
+    }
+
+    public static String genInvalidHolderSymbols() {
+        return faker.numerify("#### #### #### ####");
+    }
+
+    public static String genInvalidCVC2() {
+        return faker.numerify("##");
+    }
+
+    public static String genRandomInvalidCVC() {
+        return faker.letterify("???");
+    }
+
+    public static String genRandomOne() {
+        return faker.numerify("#");
     }
 }

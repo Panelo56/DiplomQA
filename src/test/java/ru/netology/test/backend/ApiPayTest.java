@@ -53,14 +53,134 @@ public class ApiPayTest {
         given().spec(spec).body(body)
                 .when().post(paymentUrl)
                 .then().statusCode(200);
-        payments = DataBaseHelper.getPayments();
-        credits = DataBaseHelper.getCreditsRequest();
-        orders = DataBaseHelper.getOrders();
+        payments = DataBaseHelper.getPay();
+        credits = DataBaseHelper.getCredit();
+        orders = DataBaseHelper.getOrder();
         assertEquals(1, payments.size());
         assertEquals(0, credits.size());
         assertEquals(1, orders.size());
         assertTrue(payments.get(0).getStatus().equalsIgnoreCase("approved"));
         assertEquals(payments.get(0).getTransaction_id(), orders.get(0).getPayment_id());
         assertNull(orders.get(0).getCredit_id());
+    }
+
+    @Test
+    public void shouldUnsuccessfulSending() {
+        cardData = DataHelper.getValidDeclinedCard();
+        var body = gson.toJson(cardData);
+        given().spec(spec).body(body)
+                .when().post(paymentUrl)
+                .then().statusCode(200);
+
+        payments = DataBaseHelper.getPay();
+        credits = DataBaseHelper.getCredit();
+        orders = DataBaseHelper.getOrder();
+        assertEquals(1, payments.size());
+        assertEquals(0, credits.size());
+        assertEquals(1, orders.size());
+
+        assertTrue(payments.get(0).getStatus().equalsIgnoreCase("declined"));
+        assertEquals(payments.get(0).getTransaction_id(), orders.get(0).getPayment_id());
+        assertNull(orders.get(0).getCredit_id());
+    }
+
+    @Test
+    public void should400StatusWithAnEmptyBody() {
+        cardData = DataHelper.getValidApprovedCard();
+        given().spec(spec)
+                .when().post(paymentUrl)
+                .then().statusCode(400);
+
+        payments = DataBaseHelper.getPay();
+        credits = DataBaseHelper.getCredit();
+        orders = DataBaseHelper.getOrder();
+        assertEquals(0, payments.size());
+        assertEquals(0, credits.size());
+        assertEquals(0, orders.size());
+    }
+
+    @Test
+    public void should400StatusWithAnEmptyNumber() {
+        cardData = new DataHelper.CardData(null, DataHelper.genMonth(1), DataHelper.genYear(2),
+                DataHelper.genValidHolder(), DataHelper.genValidCVC());
+        var body = gson.toJson(cardData);
+        given().spec(spec).body(body)
+                .when().post(paymentUrl)
+                .then().statusCode(400);
+
+        payments = DataBaseHelper.getPay();
+        credits = DataBaseHelper.getCredit();
+        orders = DataBaseHelper.getOrder();
+        assertEquals(0, payments.size());
+        assertEquals(0, credits.size());
+        assertEquals(0, orders.size());
+    }
+
+    @Test
+    public void should400StatusWithAnEmptyMonth() {
+        cardData = new DataHelper.CardData(DataHelper.getStatusNumber("approved"), null, DataHelper.genYear(2),
+                DataHelper.genValidHolder(), DataHelper.genValidCVC());
+        var body = gson.toJson(cardData);
+        given().spec(spec).body(body)
+                .when().post(paymentUrl)
+                .then().statusCode(400);
+
+        payments = DataBaseHelper.getPay();
+        credits = DataBaseHelper.getCredit();
+        orders = DataBaseHelper.getOrder();
+        assertEquals(0, payments.size());
+        assertEquals(0, credits.size());
+        assertEquals(0, orders.size());
+    }
+
+    @Test
+    public void should400StatusWithAnEmptyYear() {
+        cardData = new DataHelper.CardData(DataHelper.getStatusNumber("approved"), DataHelper.genMonth(1), null,
+                DataHelper.genValidHolder(), DataHelper.genValidCVC());
+        var body = gson.toJson(cardData);
+        given().spec(spec).body(body)
+                .when().post(paymentUrl)
+                .then().statusCode(400);
+
+        payments = DataBaseHelper.getPay();
+        credits = DataBaseHelper.getCredit();
+        orders = DataBaseHelper.getOrder();
+        assertEquals(0, payments.size());
+        assertEquals(0, credits.size());
+        assertEquals(0, orders.size());
+    }
+
+    @Test
+    public void should400StatusWithAnEmptyHolder() {
+        cardData = new DataHelper.CardData(DataHelper.getStatusNumber("approved"), DataHelper.genMonth(1),
+                DataHelper.genYear(2), null, DataHelper.genValidCVC());
+        var body = gson.toJson(cardData);
+        given().spec(spec).body(body)
+                .when().post(paymentUrl)
+                .then().statusCode(400);
+
+        payments = DataBaseHelper.getPay();
+        credits = DataBaseHelper.getCredit();
+        orders = DataBaseHelper.getOrder();
+        assertEquals(0, payments.size());
+        assertEquals(0, credits.size());
+        assertEquals(0, orders.size());
+    }
+
+    @Test
+    public void should400StatusWithAnEmptyCVC() {
+        cardData = new DataHelper.CardData(DataHelper.getStatusNumber("approved"), DataHelper.genMonth(1),
+                DataHelper.genYear(2), DataHelper.genValidHolder(), null);
+        var body = gson.toJson(cardData);
+        given().spec(spec).body(body)
+                .when().post(paymentUrl)
+                .then().statusCode(400);
+
+        payments = DataBaseHelper.getPay();
+        credits = DataBaseHelper.getCredit();
+        orders = DataBaseHelper.getOrder();
+        assertEquals(0, payments.size());
+        assertEquals(0, credits.size());
+        assertEquals(0, orders.size());
     }
 }

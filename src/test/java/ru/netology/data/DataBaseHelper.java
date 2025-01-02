@@ -47,7 +47,7 @@ public class DataBaseHelper {
     }
 
     @SneakyThrows
-    public static List<PaymentEntity> getPayments() {
+    public static List<PaymentEntity> getPay() {
         getConnection();
         var sqlQuery = "SELECT * FROM payment_entity ORDER BY created DESC;";
         ResultSetHandler<List<PaymentEntity>> resultHandler = new BeanListHandler<>(PaymentEntity.class);
@@ -65,7 +65,7 @@ public class DataBaseHelper {
     }
 
     @SneakyThrows
-    public static List<CreditRequestEntity> getCreditsRequest() {
+    public static List<CreditRequestEntity> getCredit() {
         getConnection();
         var sqlQuery = "SELECT * FROM credit_request_entity ORDER BY created DESC;";
         ResultSetHandler<List<CreditRequestEntity>> resultHandler = new BeanListHandler<>(CreditRequestEntity.class);
@@ -83,7 +83,7 @@ public class DataBaseHelper {
     }
 
     @SneakyThrows
-    public static List<OrderEntity> getOrders() {
+    public static List<OrderEntity> getOrder() {
         getConnection();
         var sqlQuery = "SELECT * FROM order_entity ORDER BY created DESC;";
         ResultSetHandler<List<OrderEntity>> resultHandler = new BeanListHandler<>(OrderEntity.class);
